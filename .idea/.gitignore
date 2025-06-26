@@ -1,3 +1,31 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+# Archivos de compilación
+/build/
+/.gradle/
+/app/build/
+
+# Configuración local
+local.properties
+
+# Archivos generados por Android Studio
+.idea/
+*.iml
+*.apk
+*.aab
+*.dex
+*.class
+*.log
+
+# Archivos de compilación nativos
+.cxx/
+.externalNativeBuild/
+
+# Archivos sensibles
+*.jks
+*.keystore
+google-services.json
+
+# Archivos de perfilado
+*.hprof
