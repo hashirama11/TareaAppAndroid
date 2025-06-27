@@ -25,3 +25,8 @@ fun actualizarTarea(id : Long, tarea : String) {
 fun deleteTarea(id : Long) {
     tareas.remove(id)
 }
+
+// Funcion de Lectura de todas las tareas
+fun leerTareas(): List<String> {
+    return tareas.values.toList()
+}

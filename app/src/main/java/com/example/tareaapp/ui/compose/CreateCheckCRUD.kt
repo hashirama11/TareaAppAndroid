@@ -24,11 +24,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.tareaapp.Service.PersistenciaDataService
 import com.example.tareaapp.Service.crearTarea
 
 @Composable
-fun CreateCheckCRUD(modifier: Modifier = Modifier){
+fun CreateCheckCRUDUI(onNavigate : (String) -> Unit = {}){
 
     // Variables de Estado
     var textoTarea by remember { mutableStateOf("") }
@@ -89,10 +90,17 @@ fun CreateCheckCRUD(modifier: Modifier = Modifier){
 
 }
 
-@Preview
 @Composable
-fun CreateCheckCRUDPreview(){
-    CreateCheckCRUD()
+fun CreateCheckCRUD(navController: NavController){
+    CreateCheckCRUDUI(
+        onNavigate = { route ->
+            navController.navigate(route)
+        }
+    )
 }
 
-
+@Preview(showBackground = true)
+@Composable
+fun CreateCheckCRUDPreview(){
+    CreateCheckCRUDUI()
+}
