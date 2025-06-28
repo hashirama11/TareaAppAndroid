@@ -5,8 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
-import androidx.navigation.compose.rememberNavController
-import com.example.tareaapp.ui.compose.InicioAppComposable
 import com.example.tareaapp.ui.compose.MiApp
 
 class MainActivity : ComponentActivity() {

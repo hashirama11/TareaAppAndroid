@@ -8,6 +8,8 @@ public class PersistenciaDataService {
     private String tarea;
     private Long id;
 
+    private Boolean estado = false;
+
     //Constructor de la Clase
     public PersistenciaDataService(Long id, String tarea){
         this.id = id;
@@ -27,12 +29,19 @@ public class PersistenciaDataService {
     public void setId(Long id) {
         this.id = id;
     }
+    public Boolean getEstado() {
+        return estado;
+    }
+    public void setEstado(Boolean estado) {
+        this.estado = estado;
+    }
 
     @Override
     public String toString() {
         return "PersistenciaDataService{" +
                 "tarea='" + tarea + '\'' +
                 ", id=" + id +
+                ", estado=" + estado +
                 '}';
     }
 }

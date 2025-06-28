@@ -2,6 +2,7 @@ package com.example.tareaapp.ui.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,10 +27,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.tareaapp.Service.PersistenciaDataService
+import com.example.tareaapp.Service.Rutas
 import com.example.tareaapp.Service.crearTarea
 
 @Composable
-fun CreateCheckCRUDUI(onNavigate : (String) -> Unit = {}){
+fun CreateCheckCRUDUI(onNavegar : (String) -> Unit = {}){
 
     // Variables de Estado
     var textoTarea by remember { mutableStateOf("") }
@@ -70,20 +72,34 @@ fun CreateCheckCRUDUI(onNavigate : (String) -> Unit = {}){
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = {
-                    if (textoTarea.isNotBlank()) {
-                        val nuevoId = System.currentTimeMillis()
-                        val nuevaTarea = PersistenciaDataService(nuevoId, textoTarea)
-                        crearTarea(nuevaTarea)
-                        textoTarea = ""
-                    }else{
-                        textoTarea = "Ingrese una tarea"
-                    }
-                },
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
             ) {
-                Text("Crear")
+                Button(onClick = {onNavegar(Rutas.Home)}) {
+                    Text("Regresar al inicio")
+                }
+
+                Button(
+                    onClick = {
+                        if (textoTarea.isNotBlank()) {
+                            val nuevoId = System.currentTimeMillis()
+                            val nuevaTarea = PersistenciaDataService(nuevoId, textoTarea)
+                            crearTarea(nuevaTarea)
+                            textoTarea = ""
+                        }else{
+                            textoTarea = "Ingrese una tarea"
+                        }
+                    },
+                ) {
+                    Text("Crear Tarea")
+                }
+
             }
+
         }
 
     }
@@ -93,7 +109,7 @@ fun CreateCheckCRUDUI(onNavigate : (String) -> Unit = {}){
 @Composable
 fun CreateCheckCRUD(navController: NavController){
     CreateCheckCRUDUI(
-        onNavigate = { route ->
+        onNavegar = { route ->
             navController.navigate(route)
         }
     )
