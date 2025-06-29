@@ -6,6 +6,8 @@ val tareas = mutableMapOf<Long, Pair<String, Boolean>>()
 
 // Funcion de Creacion de tareas CREATE
 
+// Variable global para el ID de la tarea (autoincremental)
+var proxId = 1L
 fun crearTarea(persistenciaDataService: PersistenciaDataService) {
     val id = persistenciaDataService.getId()
     val tarea = persistenciaDataService.getTarea()
@@ -13,9 +15,10 @@ fun crearTarea(persistenciaDataService: PersistenciaDataService) {
 
     val valor = Pair(tarea, estado)
     tareas[id] = valor
+    proxId = id + 1
 }
 
-// Funcion de Lectura de tarea READ
+// Funcion de Lectura de tarea READ por id
 fun leerTarea(id : Long): String? {
     if (!tareas.containsKey(id)) {
         return null
@@ -54,6 +57,8 @@ fun deleteTareaPorContenido(contenidoBuscado: String): Boolean { // Devuelve tru
         false
     }
 }
+
+
 
 // Funcion para modificar el estado de una tarea (buscando por contenido)
 fun cambiarEstadoPorContenido(contenidoBuscado: String, nuevoEstado: Boolean): Boolean {

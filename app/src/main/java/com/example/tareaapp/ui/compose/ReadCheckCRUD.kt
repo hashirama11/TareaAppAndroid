@@ -32,6 +32,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,9 +42,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.navigation.NavController
 import com.example.tareaapp.R
 import com.example.tareaapp.Service.Rutas
-import com.example.tareaapp.Service.cambiarEstadoPorContenido
-import com.example.tareaapp.Service.deleteTareaPorContenido
-import com.example.tareaapp.Service.leerInfoCompletaDeTodasLasTareas
+import com.example.tareaapp.Service.actualizarTarea
+import com.example.tareaapp.Service.cambiarEstadoPorId
+import com.example.tareaapp.Service.deleteTarea
+import com.example.tareaapp.Service.tareas
 
 // Compose para la vista de lectura
 
@@ -52,8 +54,15 @@ fun ReadCheckCRUDUI(
     modifier: Modifier = Modifier,
     onNavegar: (String) -> Unit = {}
 ) {
-    // Ahora obtenemos una lista de Pares (contenido de la tarea, estado)
-    val tareasExistencias: List<Pair<String, Boolean>> = leerInfoCompletaDeTodasLasTareas()
+
+    // Construimos la lista reactiva a partir del mapa original
+    val tareasExistencias = remember {
+        derivedStateOf {
+            tareas.map { (id, par) ->
+                TareaVisual(id, par.first, par.second)
+            }
+        }
+    }.value
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -75,28 +84,24 @@ fun ReadCheckCRUDUI(
                 if (tareasExistencias.isEmpty()) {
                     EmptyStateCard()
                 } else {
+
                     ExpandableTaskList(
-                        // Pasamos la lista de Pares
                         listaDeTareasConEstado = tareasExistencias,
                         expanded = true,
-                        onAccionDeTareaConfirmada = { accion, tareaAfectadaContenido ->
-                            // 'tareaAfectadaContenido' aquí será el String de la tarea
-                            println("Acción confirmada: $accion para la tarea: $tareaAfectadaContenido")
+                        onAccionDeTareaConfirmada = { accion, id ->
                             when (accion) {
                                 TareaAction.Borrar -> {
-                                    // Usas el contenido para llamar a deleteTareaPorContenido
-                                    deleteTareaPorContenido(tareaAfectadaContenido)
-                                    // TODO: Necesitas una forma de que la UI se actualice después de esto.
-                                    // Idealmente, 'tareasExistencias' sería un estado que se recompone.
+                                    deleteTarea(id)
                                 }
                                 TareaAction.Modificar -> {
-                                    // Navegar o mostrar diálogo para modificar tareaAfectadaContenido
+                                    // Por ahora, por ejemplo: actualizamos a contenido fijo (simulado)
+                                    val contenidoActual = tareas[id]?.first ?: return@ExpandableTaskList
+                                    val nuevoContenido = "$contenidoActual (editado)"
+                                    actualizarTarea(id, nuevoContenido)
                                 }
                                 TareaAction.Listo -> {
-                                    // Usas el contenido para llamar a cambiarEstadoPorContenido
-                                    // Suponiendo que 'Listo' significa marcar como true
-                                    cambiarEstadoPorContenido(tareaAfectadaContenido, true)
-                                    // TODO: Actualizar UI
+                                    val estadoActual = tareas[id]?.second ?: return@ExpandableTaskList
+                                    cambiarEstadoPorId(id, !estadoActual)
                                 }
                                 TareaAction.Ninguna -> { /* No debería pasar */ }
                             }
@@ -132,6 +137,7 @@ enum class TareaAction {
 @Composable
 fun TareaItem(
     // Acepta el contenido y el estado por separado
+    id : Long,
     contenidoTarea: String,
     estaCompletada: Boolean,
     // La lambda de confirmación solo devuelve la acción.
@@ -167,6 +173,13 @@ fun TareaItem(
                     contentDescription = "Ícono de tarea",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "ID: $id",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
@@ -262,28 +275,26 @@ fun ConfirmacionDialog(
     }
 }
 
+// Modelo de datos para una tarea visual en la lista UI
+data class TareaVisual(val id: Long, val contenido: String, val estado: Boolean)
+
 // Compose para mostrar una lista de tareas expandible
 @Composable
 fun ExpandableTaskList(
-    // Acepta la lista de Pares
-    listaDeTareasConEstado: List<Pair<String, Boolean>>,
+    listaDeTareasConEstado: List<TareaVisual>,
     expanded: Boolean,
-    onAccionDeTareaConfirmada: (accion: TareaAction, tareaAfectadaContenido: String) -> Unit,
-    modifier: Modifier = Modifier
+    onAccionDeTareaConfirmada: (accion: TareaAction, id: Long) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         if (expanded) {
-            listaDeTareasConEstado.forEach { tareaPar ->
-                // tareaPar es un Pair<String, Boolean>
+            listaDeTareasConEstado.forEach { tarea ->
                 TareaItem(
-                    // Pasamos el contenido (String) a TareaItem
-                    contenidoTarea = tareaPar.first,
-                    // Pasamos el estado (Boolean) a TareaItem
-                    estaCompletada = tareaPar.second,
-                    // La lambda de confirmación sigue esperando el contenido (String) de la tarea
-                    onAccionConfirmada = { accion -> // TareaItem ahora solo devuelve la acción
-                        // Propagamos la acción y el contenido de la tarea actual
-                        onAccionDeTareaConfirmada(accion, tareaPar.first)
+                    id = tarea.id,
+                    contenidoTarea = tarea.contenido,
+                    estaCompletada = tarea.estado,
+                    onAccionConfirmada = { accion ->
+                        onAccionDeTareaConfirmada(accion, tarea.id)
                     },
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
